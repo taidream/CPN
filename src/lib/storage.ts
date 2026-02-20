@@ -1,45 +1,62 @@
-import { demoEntries, defaultSettings } from "@/lib/demo";
-import { Entry, Settings } from "@/lib/types";
+import { makeInitialState } from "@/lib/demo";
+import { AppState } from "@/lib/types";
 
-const ENTRIES_KEY = "cpn_entries";
-const SETTINGS_KEY = "cpn_settings";
-const SEEDED_KEY = "cpn_seeded";
+const STORAGE_KEY = "boymath_cpn_v2";
 
-export function initStorage() {
-  if (typeof window === "undefined") return;
-  if (!localStorage.getItem(SEEDED_KEY)) {
-    localStorage.setItem(ENTRIES_KEY, JSON.stringify(demoEntries()));
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
-    localStorage.setItem(SEEDED_KEY, "true");
+export function loadState(): AppState {
+  if (typeof window === "undefined") return makeInitialState();
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    const seeded = makeInitialState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+    return seeded;
+  }
+  try {
+    const parsed = JSON.parse(raw) as AppState;
+    if (!parsed.settings || !parsed.partners || !parsed.entries) throw new Error("invalid");
+    return parsed;
+  } catch {
+    const seeded = makeInitialState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+    return seeded;
   }
 }
 
-export function loadEntries(): Entry[] {
-  if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(ENTRIES_KEY);
-  return raw ? (JSON.parse(raw) as Entry[]) : [];
-}
-
-export function saveEntries(entries: Entry[]) {
+export function saveState(state: AppState) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-export function loadSettings(): Settings {
-  if (typeof window === "undefined") return defaultSettings;
-  const raw = localStorage.getItem(SETTINGS_KEY);
-  return raw ? ({ ...defaultSettings, ...JSON.parse(raw) } as Settings) : defaultSettings;
+export function resetState() {
+  if (typeof window === "undefined") return makeInitialState();
+  const fresh = makeInitialState();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+  return fresh;
 }
 
-export function saveSettings(settings: Settings) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+export function exportStateJson(state: AppState) {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `boymath-cpn-v2-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
-export function resetAll() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(ENTRIES_KEY);
-  localStorage.removeItem(SETTINGS_KEY);
-  localStorage.removeItem(SEEDED_KEY);
-  initStorage();
+export function importStateJson(file: File): Promise<AppState> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result)) as AppState;
+        if (!data.settings || !data.partners || !data.entries) throw new Error("Invalid backup file");
+        resolve(data);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
 }

@@ -1,73 +1,24 @@
-const captions = {
-  green: {
-    safe: [
-      "Spreadsheet says this is financially romantic.",
-      "CPN lower than delivery fees. Elite efficiency.",
-      "This connection is basically a value ETF.",
-      "Budget happy, heart happy.",
-      "High ROI, low chaos, keep cooking.",
-      "Boy math certified: sustainable fun.",
-      "This is what responsible delusion looks like.",
-      "Green light and goodnight."
-    ],
-    mixed: [
-      "Cute and chaotic, but still under budget.",
-      "You are surfing risk and still winning.",
-      "A little turbulence, still profitable.",
-      "Hazard lights off, playlist on.",
-      "You can fix nothing, but numbers look fine.",
-      "Mild chaos, premium memories.",
-      "Proceed with hydration and boundaries.",
-      "Good value, keep both eyes open."
-    ]
-  },
-  orange: {
-    safe: [
-      "Borderline budget behavior. Tighten up.",
-      "Romance inflation detected.",
-      "Numbers say chill, feelings say spend.",
-      "This is a yellow card from finance bro court.",
-      "Fun is up, efficiency is wobbling.",
-      "Maybe switch steakhouse to tacos.",
-      "Decent vibes, expensive logistics.",
-      "You are one impulse buy from red zone."
-    ],
-    mixed: [
-      "Attractive chaos tax is kicking in.",
-      "This graph is flirting with regret.",
-      "Budget alarm: medium screaming.",
-      "Pause and renegotiate expectations.",
-      "Chaos + costs = cardio for your wallet.",
-      "Receipts are starting to look cinematic.",
-      "Potential lore, questionable economics.",
-      "Cute but costly—manage the burn rate."
-    ]
-  },
-  red: {
-    safe: [
-      "CPN went supernova. Abort mission.",
-      "Wallet says no even if group chat says yes.",
-      "This is not dating, this is venture burn.",
-      "Hard cut before your savings file a complaint.",
-      "Red zone romance: dramatic and expensive.",
-      "Fun ratio collapsed. Reboot strategy.",
-      "You are paying luxury prices for normal outcomes.",
-      "Numbers are shouting; listen respectfully."
-    ],
-    mixed: [
-      "Hot-crazy premium reached legendary levels.",
-      "Risk-adjusted cuddles are not penciling out.",
-      "This is plot-driven spending.",
-      "The meme is funny, the CPN is not.",
-      "Call timeout. Protect peace and payroll.",
-      "Budget funeral with premium seating.",
-      "High chaos, low value, maximum lore.",
-      "Cut losses, keep dignity."
-    ]
-  }
-} as const;
+export const zoneCaptions: Record<string, string[]> = {
+  "hot-highdrama": ["10/10 face card, 11/10 plot twists.", "Ferrari energy, check-engine light on.", "Elite chemistry, premium chaos surcharge."],
+  "hot-lowdrama": ["This is the mythical green-zone baddie.", "Smooth vibes, no jump scares.", "Attractive and stable? Rare drop."],
+  "cold-highdrama": ["Low heat, high sirens. Tactical retreat.", "This feels like paying for stress.", "Boredom plus chaos is evil math."],
+  "cold-lowdrama": ["Peaceful, low volatility, maybe friend arc.", "Calm and affordable, not blockbuster.", "Stable but not setting your soul on fire."]
+};
 
-export function getCaption(cpnColor: "green" | "orange" | "red", risky: boolean): string {
-  const pool = risky ? captions[cpnColor].mixed : captions[cpnColor].safe;
+export function pickCaption(hot: number, drama: number) {
+  const key = `${hot >= 6 ? "hot" : "cold"}-${drama >= 6 ? "highdrama" : "lowdrama"}`;
+  const pool = zoneCaptions[key] ?? zoneCaptions["hot-lowdrama"];
   return pool[Math.floor(Math.random() * pool.length)];
 }
+
+export const achievementMeta = {
+  "free-nuts": "👑 Free Nuts",
+  "lousy-receipt": "🧾 Lousy Receipt",
+  "zen-master": "🧘 Zen Master",
+  "commuter-tax": "🚇 Commuter Tax",
+  "wallet-damage": "💸 Wallet Damage",
+  "green-flag-magnet": "🍀 Green Flag Magnet",
+  "fire-alarm": "🚨 Fire Alarm",
+  "budget-sniper": "🎯 Budget Sniper",
+  "getting-cheaper": "📉 Getting Cheaper"
+} as const;
